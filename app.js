@@ -931,8 +931,7 @@ function sendToGoogleForm(testName, pct, correct, total) {
       <select id="studentClass" style="width:100%;padding:0.75rem;border:2px solid var(--primary);border-radius:10px;font-size:1rem;margin-bottom:1.5rem">
         <option value="">Selectează clasa...</option>
 
-        <option value="10 B">10 B</option>
-        <option value="11 A">11 A</option>
+        <option value="X Ap">X Ap</option>
         <option value="Altă clasă">Altă clasă</option>
       </select>
       <div style="display:flex;gap:1rem">
