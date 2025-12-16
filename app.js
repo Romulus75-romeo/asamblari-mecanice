@@ -4926,10 +4926,133 @@ function convertUnits(type) {
   }
 }
 
-// ========== 5. DUEL ROBOT & ATELIER (Placeholders) ==========
+// ========== 5. DUEL ROBOT (OFFLINE) ==========
+let botDuelState = { p1Score: 0, botScore: 0, qIndex: 0, questions: [], history: [] };
+
 function startBotDuel() {
-  alert('🤖 Duelul cu Robotul va fi disponibil în pasul următor!');
+  if (document.getElementById('mobileNav')?.classList.contains('active')) toggleMenu();
+
+  // Select 5 random questions
+  const allQ = [];
+  Object.keys(tests).forEach(tid => allQ.push(...tests[tid]));
+  botDuelState.questions = allQ.sort(() => Math.random() - 0.5).slice(0, 5);
+  botDuelState.p1Score = 0;
+  botDuelState.botScore = 0;
+  botDuelState.qIndex = 0;
+
+  renderBotDuel();
 }
+
+function renderBotDuel() {
+  const q = botDuelState.questions[botDuelState.qIndex];
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="container">
+      <button class="btn btn-secondary back-btn" onclick="showSection('home')">← Renunță</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:var(--bg-card);border-radius:12px;margin-bottom:1rem">
+        <div style="text-align:center">
+          <div style="font-size:1.5rem">👤</div>
+          <div style="font-weight:bold">${getCurrentUser()}</div>
+          <div style="font-size:1.5rem;color:var(--primary)">${botDuelState.p1Score}</div>
+        </div>
+        <div style="font-weight:bold;color:var(--text-muted)">Runda ${botDuelState.qIndex + 1}/5</div>
+        <div style="text-align:center">
+          <div style="font-size:1.5rem">🤖</div>
+          <div style="font-weight:bold">Robot</div>
+          <div style="font-size:1.5rem;color:var(--secondary)">${botDuelState.botScore}</div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <p class="question-text">${q.q}</p>
+        <div class="options-list">
+          ${q.o.map((opt, i) => `
+            <div class="option" onclick="handleBotDuelAnswer(${i})" id="opt-duel-${i}">
+              <span class="option-marker">${String.fromCharCode(65 + i)}</span>
+              <span>${opt}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div id="duel-feedback" style="text-align:center;margin-top:1rem;font-weight:bold;min-height:3rem"></div>
+    </div>`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleBotDuelAnswer(idx) {
+  const q = botDuelState.questions[botDuelState.qIndex];
+  const correct = q.a;
+
+  // Disable options
+  document.querySelectorAll('[id^="opt-duel-"]').forEach(el => el.style.pointerEvents = 'none');
+
+  // Show user result
+  const userEl = document.getElementById(`opt-duel-${idx}`);
+  if (idx === correct) {
+    userEl.classList.add('correct');
+    botDuelState.p1Score++;
+    document.getElementById('duel-feedback').innerHTML = '<span style="color:var(--success);font-size:1.2rem">Corect! 🎉</span>';
+  } else {
+    userEl.classList.add('incorrect');
+    document.getElementById(`opt-duel-${correct}`).classList.add('correct');
+    document.getElementById('duel-feedback').innerHTML = '<span style="color:var(--error);font-size:1.2rem">Greșit!</span>';
+  }
+
+  // Bot Turn Simulation
+  document.getElementById('duel-feedback').innerHTML += '<br><span style="font-size:0.9rem;opacity:0.8">🤖 Robotul gândește...</span>';
+
+  setTimeout(() => {
+    // Bot logic: 70% chance to be correct
+    const isBotCorrect = Math.random() < 0.7;
+
+    if (isBotCorrect) {
+      botDuelState.botScore++;
+      document.getElementById('duel-feedback').innerHTML += ' <span style="color:var(--secondary)">și răspunde Corect!</span>';
+    } else {
+      document.getElementById('duel-feedback').innerHTML += ' <span style="color:var(--text-muted)">și greșește.</span>';
+    }
+
+    // Update score display immediately to show action
+    // (Actually renderBotDuel will refresh everything in next step, but let's delay)
+
+    setTimeout(() => {
+      botDuelState.qIndex++;
+      if (botDuelState.qIndex < 5) {
+        renderBotDuel();
+      } else {
+        showBotDuelResult();
+      }
+    }, 2000);
+
+  }, 1000 + Math.random() * 800);
+}
+
+function showBotDuelResult() {
+  const win = botDuelState.p1Score > botDuelState.botScore;
+  const draw = botDuelState.p1Score === botDuelState.botScore;
+
+  if (win) createConfetti();
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="container text-center" style="padding-top:2rem">
+      <h1>${win ? '🏆 Victorie!' : draw ? '🤝 Remiză' : '😢 Ai pierdut'}</h1>
+      <p style="font-size:1.2rem;margin:1rem 0">
+        Tu: <b>${botDuelState.p1Score}</b> - Robot: <b>${botDuelState.botScore}</b>
+      </p>
+      
+      <div style="font-size:5rem;margin:2rem 0">
+        ${win ? '🥇' : draw ? '🥈' : '🥉'}
+      </div>
+      
+      <div style="display:flex;gap:1rem;justify-content:center">
+        <button class="btn btn-primary" onclick="startBotDuel()">🔄 Joacă din nou</button>
+        <button class="btn btn-secondary" onclick="showSection('home')">🏠 Acasă</button>
+      </div>
+    </div>`;
+}
+
+// ========== 6. ATELIER VIRTUAL (Placeholder) ==========
 
 function showVirtualWorkshop() {
   alert('🏭 Atelierul Virtual va fi disponibil în pasul următor!');
