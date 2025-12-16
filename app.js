@@ -809,7 +809,24 @@ function renderHome() {
     { src: 'workshop_assembly_1765568430842.png', title: 'Asamblare componente' }
   ];
   const gallery = `<div style="margin:2rem 0"><h2 class="mb-3">🏭 Atelierul de Lăcătușerie</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem">${images.map(img => `<div style="border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md)"><img src="${img.src}" alt="${img.title}" style="width:100%;height:180px;object-fit:cover" onerror="this.parentElement.style.display='none'"><div style="padding:0.75rem;background:white;text-align:center;font-weight:500;color:var(--text-secondary)">${img.title}</div></div>`).join('')}</div></div>`;
-  return `<div class="hero"><span class="hero-badge">📐 Modul M3 - 280 ore</span><h1>Asamblări Mecanice</h1><p class="hero-subtitle">Platformă educațională interactivă - calificarea Sudor</p><div class="hero-stats"><div class="stat-item"><div class="stat-number">9</div><div class="stat-label">Capitole</div></div><div class="stat-item"><div class="stat-number">9</div><div class="stat-label">Teste</div></div>${stats.attempts > 0 ? `<div class="stat-item"><div class="stat-number" style="color:#fff">${stats.avgPct}%</div><div class="stat-label">Media ta</div></div>` : ''}</div></div><div class="container">${renderProgressCard()}${gallery}<h2 class="mb-3">📚 Toate Capitolele</h2><div class="section-grid">${chapters.map(ch => {
+  return `<div class="hero"><span class="hero-badge">📐 Modul M3 - 280 ore</span><h1>Asamblări Mecanice</h1><p class="hero-subtitle">Platformă educațională interactivă - calificarea Sudor</p><div class="hero-stats"><div class="stat-item"><div class="stat-number">9</div><div class="stat-label">Capitole</div></div><div class="stat-item"><div class="stat-number">9</div><div class="stat-label">Teste</div></div>${stats.attempts > 0 ? `<div class="stat-item"><div class="stat-number" style="color:#fff">${stats.avgPct}%</div><div class="stat-label">Media ta</div></div>` : ''}</div></div><div class="container">${renderProgressCard()}${gallery}
+  
+  <div class="card p-3 mb-4" style="background:var(--gradient-primary);color:white">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h3 style="margin:0;font-size:1.2rem">🧰 Unelte Inteligente</h3>
+        <p style="margin:0;opacity:0.9;font-size:0.9rem">Simulatoare și Calculatoare</p>
+      </div>
+      <div style="font-size:2rem">⚙️</div>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap">
+      <button class="btn" style="background:rgba(255,255,255,0.2);color:white;border:none" onclick="showTechnicalCalculator()">🧮 Calculator</button>
+      <button class="btn" style="background:rgba(255,255,255,0.2);color:white;border:none" onclick="startBotDuel()">🤖 Duel Robot</button>
+      <button class="btn" style="background:rgba(255,255,255,0.2);color:white;border:none" onclick="showVirtualWorkshop()">🏭 Atelier</button>
+    </div>
+  </div>
+
+  <h2 class="mb-3">📚 Toate Capitolele</h2><div class="section-grid">${chapters.map(ch => {
     const p = getProgress()[ch.id];
     const badge = p ? `<span style="position:absolute;top:10px;right:10px;background:${p.pct >= 70 ? 'var(--success)' : 'var(--warning)'};padding:2px 8px;border-radius:10px;font-size:0.75rem;color:white">${p.pct}%</span>` : '';
     return `<div class="card" style="position:relative" onclick="showSection('${ch.id}')">${badge}<div class="card-icon">${ch.icon}</div><div class="card-title">${ch.title}</div><div class="card-description">${ch.desc}</div><div class="card-meta"><span class="card-hours">⏱️ ${ch.hours}</span><button class="btn btn-primary" onclick="event.stopPropagation();startTest('${ch.id}')">Test</button></div></div>`;
@@ -4809,5 +4826,113 @@ function joinOnlineDuel() {
 // Initialize
 cacheAllContent();
 checkOfflineStatus();
+
+// ========== 4. CALCULATOR TEHNIC ==========
+function showTechnicalCalculator() {
+  if (document.getElementById('mobileNav')?.classList.contains('active')) toggleMenu();
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="container">
+      <button class="btn btn-secondary back-btn" onclick="showSection('home')">← Înapoi</button>
+      <div class="section-header">
+        <h2>🧮 Calculator Tehnic</h2>
+        <p>Unelte utile pentru atelier</p>
+      </div>
+      
+      <!-- Calculator Nituri -->
+      <div class="content-card">
+        <h3>🔩 Diametru Nit (d)</h3>
+        <p style="font-size:0.9rem;color:var(--text-muted)">Formula: d = 2 × √s (unde s = grosime pachet table)</p>
+        <div style="display:flex;gap:1rem;align-items:end;flex-wrap:wrap">
+          <div style="flex:1">
+            <label>Grosime (s) mm:</label>
+            <input type="number" id="calc-s" class="form-control" placeholder="Ex: 4" oninput="calculateRivet()">
+          </div>
+          <div style="flex:1">
+            <label>Rezultat (d):</label>
+            <div id="res-d" style="font-size:1.5rem;font-weight:bold;color:var(--primary)">- mm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculator Piuliță -->
+      <div class="content-card">
+        <h3>🔧 Cheie Piuliță (S)</h3>
+        <p style="font-size:0.9rem;color:var(--text-muted)">Aprox: S ≈ 1.732 × d (pentru hexagoane standard)</p>
+        <div style="display:flex;gap:1rem;align-items:end;flex-wrap:wrap">
+          <div style="flex:1">
+            <label>Diametru Filet (M) mm:</label>
+            <input type="number" id="calc-m" class="form-control" placeholder="Ex: 10" oninput="calculateNut()">
+          </div>
+          <div style="flex:1">
+            <label>Cheie (S):</label>
+            <div id="res-s" style="font-size:1.5rem;font-weight:bold;color:var(--secondary)">- mm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Convertor -->
+      <div class="content-card">
+        <h3>📏 Convertor Țoli ↔ mm</h3>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <div style="flex:1">
+            <label>Inch ("):</label>
+            <input type="number" id="calc-inch" class="form-control" placeholder="1" oninput="convertUnits('inch')">
+          </div>
+          <div style="flex:1">
+            <label>Milimetri (mm):</label>
+            <input type="number" id="calc-mm" class="form-control" placeholder="25.4" oninput="convertUnits('mm')">
+          </div>
+        </div>
+      </div>
+    </div>`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function calculateRivet() {
+  const s = parseFloat(document.getElementById('calc-s').value);
+  if (s > 0) {
+    const d = 2 * Math.sqrt(s);
+    document.getElementById('res-d').innerText = d.toFixed(1) + ' mm';
+  } else {
+    document.getElementById('res-d').innerText = '- mm';
+  }
+}
+
+function calculateNut() {
+  const d = parseFloat(document.getElementById('calc-m').value);
+  if (d > 0) {
+    const s = 1.732 * d; // Approx specific logic could be replaced by a lookup table if precise ISO needed
+    // Simple lookup for common sizes
+    let exact = Math.round(s);
+    if (d === 6) exact = 10;
+    if (d === 8) exact = 13;
+    if (d === 10) exact = 17; // ISO 
+    if (d === 12) exact = 19;
+
+    document.getElementById('res-s').innerHTML = `${exact} mm <span style="font-size:0.8rem;font-weight:400">(calc: ${s.toFixed(1)})</span>`;
+  } else {
+    document.getElementById('res-s').innerText = '- mm';
+  }
+}
+
+function convertUnits(type) {
+  if (type === 'inch') {
+    const inch = parseFloat(document.getElementById('calc-inch').value);
+    if (!isNaN(inch)) document.getElementById('calc-mm').value = (inch * 25.4).toFixed(2);
+  } else {
+    const mm = parseFloat(document.getElementById('calc-mm').value);
+    if (!isNaN(mm)) document.getElementById('calc-inch').value = (mm / 25.4).toFixed(3);
+  }
+}
+
+// ========== 5. DUEL ROBOT & ATELIER (Placeholders) ==========
+function startBotDuel() {
+  alert('🤖 Duelul cu Robotul va fi disponibil în pasul următor!');
+}
+
+function showVirtualWorkshop() {
+  alert('🏭 Atelierul Virtual va fi disponibil în pasul următor!');
+}
 
 console.log('🚀 Toate cele 4 funcționalități avansate au fost încărcate!');
