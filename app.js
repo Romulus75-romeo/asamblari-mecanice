@@ -3109,83 +3109,125 @@ function answerDailyChallenge(idx) {
   }, 1500);
 }
 
-// ========== 3. FAQ CHAT BOT ==========
-const faqResponses = {
-  'nituire': 'Nituirea este o îmbinare nedemontabilă realizată prin deformarea plastică a niturilor. Se folosește ciocan de nituire, buterolă și contracăpuitor.',
-  'sudare': 'Sudarea este procesul de îmbinare a metalelor prin topire locală. Tipuri: cu arc electric, MIG/MAG, TIG, oxiacetilenică.',
-  'lipire': 'Lipirea poate fi moale (sub 450°C cu staniu) sau tare/brazare (peste 450°C cu cupru sau argint). Necesită flux pentru curățare.',
-  'filet': 'Filetul este canalul elicoidal de pe suprafața cilindrică. Se clasifică în metric (M), Withworth, trapezoidal și ferăstrău.',
-  'arc': 'Arcurile sunt elemente elastice. Tipuri: elicoidale (de compresiune/tracțiune), în foi, de torsiune, disc (Belleville).',
-  'examen': 'Examenul final conține 20 de întrebări din toate capitolele, cu timp limitat de 30 de minute. Trebuie minimum 50% pentru promovare.',
-  'test': 'Fiecare capitol are un test cu întrebări specifice. Ai 60 de secunde per întrebare. Scorul se salvează automat.',
-  'progres': 'Progresul tău include: teste finalizate, scoruri, medalii, XP și nivel. Poți exporta sau importa progresul.',
-  'medalii': 'Medaliile se obțin pentru diverse realizări: primul test, scoruri perfecte, completarea tuturor testelor, etc.',
-  'default': 'Nu am înțeles întrebarea. Încearcă: nituire, sudare, lipire, filet, arc, examen, test, progres, medalii.'
-};
+// ========== 3. CHATBOT "INGINERUL" & FAQ ==========
+const knowledgeBase = [
+  { k: ['nituire', 'nit'], a: 'Nituirea este îmbinarea nedemontabilă a două sau mai multe piese ,realizată cu ajutorul niturilor. Se folosește la structuri metalice supuse la vibrații (poduri, nave, avioane).' },
+  { k: ['clasificare', 'nituri'], a: 'Niturile se clasifică după: formă (cap semirotund, înecat, plat), material (oțel, cupru, aluminiu) și mod de execuție (manuală, mecanică).' },
+  { k: ['temperatura', 'cald'], a: 'Nituirea la cald se face la 850-1000°C pentru nituri din oțel cu diametrul peste 10mm.' },
+  { k: ['defecte', 'nituire'], a: 'Defecte frecvente: cap fisurat (supraîncălzire), joc între table (tijă prea scurtă), nit strâmb (găuri necoaxiale), cap descentrat.' },
+  { k: ['sudare', 'sudură'], a: 'Sudarea este asamblarea nedemontabilă realizată prin topirea locală a materialelor. Procedee principale: MMA (electrod învelit), MIG/MAG (sârmă), TIG (electrod nefuzibil).' },
+  { k: ['electrod', 'rutilic', 'bazic'], a: 'Electrozii Rutilici (R) sunt pentru uz general, amorsare ușoară. Cei Bazici (B) sunt pentru structuri de rezistență, dar necesită uscare și curent continuu.' },
+  { k: ['lipire', 'moale', 'tare'], a: 'Lipirea moale se face sub 450°C (cu aliaje de cositor-plumb). Lipirea tare se face peste 450°C (aliaje cupru-zinc, argint) și este mult mai rezistentă.' },
+  { k: ['filet', 'metric', 'whitworth'], a: 'Filetul Metric (M) are profil triunghiular la 60°. Filetul Whitworth (W) are profil la 55° și se măsoară în țoli (inch). 1 inch = 25.4mm.' },
+  { k: ['siguranță', 'autodesfacere', 'grower'], a: 'Asigurarea contra autodesfacerii se face cu: șaibe Grower, piulițe cu autoblocare (inel plastic), contrapiulițe, șplinturi sau șaibe de siguranță cu urechi.' },
+  { k: ['arc', 'elicoidal', 'foi'], a: 'Arcul elicoidal este făcut din sârmă oțeloasă. Arcul în foi (lamelar) este compus din mai multe foi de oțel și se folosește la suspensiile camioanelor/trenurilor.' },
+  { k: ['pana', 'pene', 'caneluri'], a: 'Pana este un organ de mașină folosit pentru a fixa un butuc pe un arbore. Canelurile sunt "pene multiple" care fac corp comun cu arborele, pentru cupluri mari.' },
+  { k: ['rulment', 'lagăr'], a: 'Rulmenții transformă frecarea de alunecare în frecare de rostogolire. Sunt compuși din: inel interior, inel exterior, corpuri de rostogolire (bile/role) și colivie.' },
+  { k: ['material', 'otel', 'fonta'], a: 'Oțelul este aliaj Fier-Carbon cu sub 2.11% carbon (tenace, deformabil). Fonta are peste 2.11% carbon (dură, casantă, bună pentru batiuri).' },
+  { k: ['scule', 'trusa'], a: 'Scule uzuale: ciocan, șurubelniță, chei fixe/inelare, clește,  fierăstrău, pilă. Instrumente de măsură: șubler, micrometru, echer.' },
+  { k: ['protectie', 'nssm'], a: 'NSSM: Purtați ochelari de protecție, mănuși, salopetă, bocanci cu bombeu. Nu folosiți scule defecte. Aerisiți spațiul de lucru.' }
+];
 
 function showChatBot() {
-  if (document.getElementById('mobileNav').classList.contains('active')) toggleMenu();
+  if (document.getElementById('mobileNav')?.classList.contains('active')) toggleMenu();
 
   document.getElementById('mainContent').innerHTML = `
     <div class="container">
       <button class="btn btn-secondary back-btn" onclick="showSection('home')">← Înapoi</button>
       <div class="section-header">
-        <h2>💬 Asistent FAQ</h2>
-        <p>Întreabă-mă despre asamblări mecanice!</p>
+        <h2>💬 Asistent Inginer</h2>
+        <p>Inteligență Artificială (Simulată) pentru Asamblări Mecanice</p>
       </div>
       
-      <div id="chatMessages" style="background:var(--bg-card);border-radius:16px;padding:1.5rem;min-height:300px;max-height:400px;overflow-y:auto;margin-bottom:1rem">
-        <div class="chat-msg bot">
-          <div style="background:var(--primary);color:white;padding:1rem;border-radius:16px 16px 16px 0;max-width:80%;margin-bottom:1rem">
-            👋 Salut! Sunt asistentul tău pentru asamblări mecanice. Întreabă-mă despre: <strong>nituire, sudare, lipire, filet, arcuri, examene</strong> sau altele!
-          </div>
+      <div id="chatMessages" style="background:var(--bg-card);border-radius:16px;padding:1.5rem;min-height:350px;max-height:450px;overflow-y:auto;margin-bottom:1rem;border:1px solid rgba(0,0,0,0.05)">
+        <div class="chat-msg system">
+          <div class="msg-avatar" style="width:40px;height:40px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:1rem">🤖</div>
+          <div style="background:white;padding:1rem;border-radius:4px 20px 20px 20px;box-shadow:0 2px 5px rgba(0,0,0,0.05);max-width:80%;color:#333">Salut! Sunt asistentul tău virtual. Întreabă-mă orice despre nituire, sudare, filete, materiale sau scule!</div>
         </div>
       </div>
-      
-      <div style="display:flex;gap:0.5rem">
-        <input type="text" id="chatInput" placeholder="Scrie întrebarea ta..." style="flex:1;padding:1rem;border:2px solid var(--primary);border-radius:12px;font-size:1rem" onkeypress="if(event.key==='Enter')sendChatMessage()">
-        <button class="btn btn-primary" onclick="sendChatMessage()">📤 Trimite</button>
+
+      <div class="chat-input-area" style="display:flex;gap:0.5rem">
+        <input type="text" id="chatInput" placeholder="Scrie întrebarea ta aici..." style="flex:1;padding:1rem;border-radius:30px;border:2px solid var(--primary);font-size:1rem;outline:none" onkeypress="if(event.key==='Enter') sendChatMessage()">
+        <button class="btn btn-primary" onclick="sendChatMessage()" style="border-radius:50%;width:50px;height:50px;padding:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem">➤</button>
       </div>
       
-      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem">
-        ${['nituire', 'sudare', 'lipire', 'filet', 'arc', 'examen'].map(t =>
-    `<button class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.9rem" onclick="document.getElementById('chatInput').value='${t}';sendChatMessage()">${t}</button>`
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem;justify-content:center">
+        ${['Defecte nituire', 'Tipuri de sudură', 'Ce este un arc?', 'Filet metric', 'Măsuri de protecție'].map(t =>
+    `<button class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.85rem;border-radius:20px" onclick="document.getElementById('chatInput').value='${t}';sendChatMessage()">${t}</button>`
   ).join('')}
       </div>
     </div>`;
+
   document.getElementById('chatInput').focus();
 }
 
 function sendChatMessage() {
   const input = document.getElementById('chatInput');
-  const msg = input.value.trim().toLowerCase();
-  if (!msg) return;
+  const text = input.value.trim();
+  if (!text) return;
 
-  const chatDiv = document.getElementById('chatMessages');
+  const msgs = document.getElementById('chatMessages');
 
-  // Add user message
-  chatDiv.innerHTML += `
-    <div style="text-align:right;margin-bottom:1rem">
-      <div style="background:var(--secondary);color:white;padding:1rem;border-radius:16px 16px 0 16px;max-width:80%;display:inline-block">${input.value}</div>
+  // User message
+  msgs.innerHTML += `
+    <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-direction:row-reverse;animation:fadeIn 0.3s ease">
+      <div style="width:40px;height:40px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">👤</div>
+      <div style="background:var(--primary);color:white;padding:1rem;border-radius:20px 4px 20px 20px;max-width:80%">${text}</div>
     </div>`;
 
-  // Find response
-  let response = faqResponses.default;
-  Object.keys(faqResponses).forEach(key => {
-    if (msg.includes(key)) response = faqResponses[key];
-  });
-
-  // Add bot response with delay
-  setTimeout(() => {
-    chatDiv.innerHTML += `
-      <div style="margin-bottom:1rem">
-        <div style="background:var(--primary);color:white;padding:1rem;border-radius:16px 16px 16px 0;max-width:80%">🤖 ${response}</div>
-      </div>`;
-    chatDiv.scrollTop = chatDiv.scrollHeight;
-  }, 500);
-
   input.value = '';
-  chatDiv.scrollTop = chatDiv.scrollHeight;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Bot thinking animation
+  const thinkingId = 'thinking-' + Date.now();
+  msgs.innerHTML += `
+    <div style="display:flex;gap:1rem;margin-bottom:1rem;animation:fadeIn 0.3s ease" id="${thinkingId}">
+      <div style="width:40px;height:40px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">🤖</div>
+      <div style="background:white;padding:1rem;border-radius:4px 20px 20px 20px;box-shadow:0 2px 5px rgba(0,0,0,0.05);color:#333">...</div>
+    </div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Analyze query
+  setTimeout(() => {
+    document.getElementById(thinkingId).remove();
+    let reply = "Îmi pare rău, nu am înțeles exact. Poți reformula? Întreabă-mă despre nituri, sudură, filete sau scule.";
+
+    // Smart search algorithm
+    const words = text.toLowerCase().split(/[\s,?!.-]+/);
+    let bestMatch = null;
+    let maxScore = 0;
+
+    knowledgeBase.forEach(item => {
+      let score = 0;
+      item.k.forEach(keyword => {
+        if (text.toLowerCase().includes(keyword)) score += 2; // Exact phrase match
+        else if (words.some(w => w.includes(keyword))) score += 1; // Partial word match
+      });
+      if (score > maxScore) {
+        maxScore = score;
+        bestMatch = item;
+      }
+    });
+
+    if (maxScore > 0 && bestMatch) {
+      reply = bestMatch.a;
+    }
+    // Easter eggs
+    else if (text.toLowerCase().includes('salut') || text.toLowerCase().includes('buna')) {
+      reply = "Salut! Ești gata să învățăm despre asamblări mecanice? 🛠️";
+    } else if (text.toLowerCase().includes('cine esti')) {
+      reply = "Sunt Asistentul Virtual al platformei, creat să te ajut la Mecanică! 🤖";
+    }
+
+    msgs.innerHTML += `
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;animation:fadeIn 0.3s ease">
+        <div style="width:40px;height:40px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">🤖</div>
+        <div style="background:white;padding:1rem;border-radius:4px 20px 20px 20px;box-shadow:0 2px 5px rgba(0,0,0,0.05);color:#333;max-width:80%">${reply}</div>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+
+    if (typeof soundEnabled !== 'undefined' && soundEnabled) playSound('click');
+  }, 800 + Math.random() * 500);
 }
 
 // ========== 4. TEST DE VITEZĂ ==========
