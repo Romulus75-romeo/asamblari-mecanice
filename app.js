@@ -5054,8 +5054,89 @@ function showBotDuelResult() {
 
 // ========== 6. ATELIER VIRTUAL (Placeholder) ==========
 
+// ========== 6. ATELIER VIRTUAL (SIMULATOR) ==========
+let workshopState = { step: 0 };
+
 function showVirtualWorkshop() {
-  alert('🏭 Atelierul Virtual va fi disponibil în pasul următor!');
+  if (document.getElementById('mobileNav')?.classList.contains('active')) toggleMenu();
+  workshopState.step = 0;
+  renderWorkshopHelper();
+}
+
+function renderWorkshopHelper() {
+  const step = workshopState.step;
+  let msg = "Pasul 1: Introdu nitul în gaură.";
+  if (step === 1) msg = "Pasul 2: Folosește buterola și ciocanul pentru a forma capul de închidere.";
+  if (step === 3) msg = "Felicitări! Nituire completă.";
+
+  const svgContent = `
+    <svg viewBox="0 0 300 200" style="background:#f1f5f9;border-radius:12px;width:100%;height:250px;border:2px solid var(--border)">
+      <!-- Plates -->
+      <rect x="50" y="80" width="200" height="20" fill="#cbd5e1" stroke="#334155" />
+      <rect x="50" y="100" width="200" height="20" fill="#94a3b8" stroke="#334155" />
+      
+      <!-- Rivet -->
+      <g style="transition:transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform:${step === 0 ? 'translate(0, -60px)' : 'translate(0,0)'}">
+        <!-- Head Factory -->
+        <path d="M142 80 A8 6 0 0 1 158 80" fill="#334155" />
+        <!-- Shank -->
+        <rect x="146" y="80" width="8" height="${step >= 3 ? 44 : 60}" fill="#475569" />
+        
+        <!-- Closing Head (Formed) -->
+        <path d="M142 120 A8 6 0 0 0 158 120" fill="#334155" style="opacity:${step >= 3 ? 1 : 0};transition:opacity 0.3s" />
+      </g>
+
+      <!-- Hammer Animation -->
+      ${step === 2 ? `
+        <text x="160" y="160" font-size="40" transform="rotate(45 160 160)">🔨
+          <animateTransform attributeName="transform" type="rotate" values="45 160 160; 0 160 160; 45 160 160" dur="0.3s" repeatCount="3" />
+        </text>
+      ` : ''}
+    </svg>
+  `;
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="container">
+       <button class="btn btn-secondary back-btn" onclick="showSection('home')">← Ieșire Atelier</button>
+       <div class="section-header">
+         <h2>🏭 Atelier Virtual</h2>
+         <p>${msg}</p>
+       </div>
+       
+       <div class="content-card text-center" style="padding:1rem">
+         ${svgContent}
+         
+         <div style="margin-top:2rem;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap">
+           ${step === 0 ? `<button class="btn btn-primary btn-lg" onclick="wsPlaceRivet()">1️⃣ Introdu Nitul</button>` : ''}
+           ${step === 1 ? `<button class="btn btn-primary btn-lg" onclick="wsHammer()">2️⃣ Nituire (Ciocan)</button>` : ''}
+           ${step === 3 ? `<button class="btn btn-success btn-lg" onclick="showVirtualWorkshop()">🔄 Din nou</button>` : ''}
+         </div>
+       </div>
+       
+       <div class="info-box">
+        <h4>ℹ️ Știai că?</h4>
+        <p>Lungimea tijei nitului se calculează cu formula: <strong>L = Σs + (1.4...1.6)d</strong> pentru cap semirotund.</p>
+       </div>
+    </div>`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function wsPlaceRivet() {
+  workshopState.step = 1;
+  renderWorkshopHelper();
+  if (typeof soundEnabled !== 'undefined' && soundEnabled) playSound('click');
+}
+
+function wsHammer() {
+  workshopState.step = 2; // Start animation
+  renderWorkshopHelper();
+
+  setTimeout(() => {
+    workshopState.step = 3; // Done
+    renderWorkshopHelper();
+    createConfetti();
+    if (typeof soundEnabled !== 'undefined' && soundEnabled) playSound('success');
+  }, 1000);
 }
 
 console.log('🚀 Toate cele 4 funcționalități avansate au fost încărcate!');
