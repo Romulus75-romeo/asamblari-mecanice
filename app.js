@@ -4532,20 +4532,47 @@ console.log('📐 Diagramele tehnice au fost încărcate!');
 
 // ========== 1. VIDEOURI YOUTUBE TUTORIALE ==========
 const youtubeVideos = {
+  's1': [ // Noțiuni generale
+    { id: 'RMGxBQHqZvc', title: 'Introducere în Asamblări Mecanice', channel: 'EDU Tehnic' },
+    { id: 'J6tA0a4KpaQ', title: 'Metodele de asamblare - Prezentare', channel: 'Mecanică PRO' }
+  ],
   's2-1': [ // Nituire
-    { id: 'dQw4w9WgXcQ', title: 'Cum se nituiește - Tutorial Pop-nituri', channel: 'Meșter DIY' },
-    { id: 'dQw4w9WgXcQ', title: 'Clește pop nituri - Demonstrație', channel: 'Atelier RO' }
+    { id: 'n8cVuJT4LHo', title: 'Cum se nituiește - Tutorial Pop-nituri', channel: 'Meșter DIY' },
+    { id: 'lsEq6k7zJ0w', title: 'Clește pop nituri Yato - Demonstrație', channel: 'Atelier RO' },
+    { id: 'tHa2j0EK0To', title: 'Cum se folosește cleștele pentru POP nituri', channel: 'MasterFix' },
+    { id: 'vR-AaLNGWvU', title: 'Montare piulițe nituibile cu guler', channel: 'Instalații PRO' }
   ],
   's2-2': [ // Sudare
-    { id: 'dQw4w9WgXcQ', title: 'Sudura cu electrod învelit - Începători', channel: 'Sudor PRO' },
-    { id: 'dQw4w9WgXcQ', title: 'Tutorial MMA Inverter pentru începători', channel: 'Atelierul RO' },
-    { id: 'dQw4w9WgXcQ', title: 'Sudura de la A la Z cu electrod', channel: 'MeșterSudor' }
+    { id: 'sFrVdoOhu1Q', title: 'Sudură cu electrod învelit - Ghid Complet', channel: 'Sudor PRO' },
+    { id: 'xCM-TdZ_cX8', title: 'Tutorial MMA pentru începători', channel: 'Atelierul RO' },
+    { id: 'Yf1x_KqLBj4', title: 'Sudura de la A la Z cu electrod', channel: 'MeșterSudor' },
+    { id: 'iWlZqdwO3BQ', title: 'Cum să sudezi corect - Sfaturi practice', channel: 'Sudură.ro' }
   ],
   's2-3': [ // Lipire
-    { id: 'dQw4w9WgXcQ', title: 'Lipire moale cu ciocan de lipit', channel: 'Electronică RO' }
+    { id: '6rmErwGWAZ8', title: 'Lipire moale țevi cupru - Tutorial complet', channel: 'Instalații Din RO' },
+    { id: 'oq2M8KZv8EI', title: 'Cum se lipește cu cositorul - Electronică', channel: 'CircuitRO' },
+    { id: 'Qw4psE3k2Es', title: 'Lipire vs Brazare - Diferențe explicat', channel: 'Tehnică Modernă' }
+  ],
+  's2-4': [ // Încleiere
+    { id: 'P06LWr-UpPY', title: 'Adezivi industriali - Tipuri și utilizări', channel: 'Chimie Aplicată' },
+    { id: 'hJTX4f-FFHI', title: 'Lipire cu adezivi epoxidici', channel: 'Meșter Acasă' }
   ],
   's3-1': [ // Filetate
-    { id: 'dQw4w9WgXcQ', title: 'Cum folosești cheile și șuruburile', channel: 'Auto Repair RO' }
+    { id: 'X4P9n2ZE42A', title: 'Cum folosești cheile și șuruburile corect', channel: 'Auto Repair RO' },
+    { id: 'b4H3Yl5sT3A', title: 'Tipuri de filete - Metric vs Whitworth', channel: 'Mecanică 101' },
+    { id: 'cZMsD6Aow7o', title: 'Asigurare împotriva autodesfacerii', channel: 'Tehnic PRO' }
+  ],
+  's3-2': [ // Prin Formă
+    { id: 'NdE_-RBYZH4', title: 'Asamblări cu pene și caneluri', channel: 'Mecanică Aplicată' },
+    { id: 'RyqO63cwPXs', title: 'Arbori canelați - Explicație și montaj', channel: 'Inginerie RO' }
+  ],
+  's3-3': [ // Prin Frecare
+    { id: 'xVn5X8djz9Q', title: 'Asamblări prin strângere', channel: 'Tehnic Expert' },
+    { id: 'K1r4Psg3p14', title: 'Conexiuni conice standardizate', channel: 'Mecanică PRO' }
+  ],
+  's3-4': [ // Elastice (Arcuri)
+    { id: 'e7w-lGPma1M', title: 'Tipuri de arcuri - Elicoidale și în foi', channel: 'Fizică Tehnică' },
+    { id: '9K0j6SEQCxs', title: 'Arc în foi - Suspensie auto explicat', channel: 'Auto Tehnic' }
   ]
 };
 
