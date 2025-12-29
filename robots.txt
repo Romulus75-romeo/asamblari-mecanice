@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://romulus75-romeo.github.io/asamblari-mecanice/sitemap.xml
+
+# Platformă educațională pentru Asamblări Mecanice
+# Liceul Tehnologic "Aurel Vlaicu" Galați
