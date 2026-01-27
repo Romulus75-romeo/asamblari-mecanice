@@ -1,4 +1,4 @@
-const CACHE_NAME = 'asamblari-v2';
+const CACHE_NAME = 'asamblari-v3';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -43,7 +43,25 @@ self.addEventListener('fetch', event => {
     // Skip non-GET requests
     if (event.request.method !== 'GET') return;
 
-    // Cache-first for static assets
+    // Network-First for core files (HTML, CSS, JS) - Ensures updates are seen immediately
+    if (event.request.url.includes('index.html') ||
+        event.request.url.includes('styles.css') ||
+        event.request.url.includes('app.js') ||
+        event.request.url.endsWith('/')) {
+
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request)) // Fallback to cache if offline
+        );
+        return;
+    }
+
+    // Cache-first for other static assets (images, fonts)
     if (STATIC_ASSETS.some(asset => event.request.url.includes(asset.replace('./', '')))) {
         event.respondWith(
             caches.match(event.request)
