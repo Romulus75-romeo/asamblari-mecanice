@@ -949,84 +949,100 @@ function showResult() {
 }
 
 // ========== FORM SUBMIT INTEGRATION ==========
-let currentStudent = null;
-let pendingCallback = null;
+let currentStudent = null; // Stores { name, email }
+let pendingTestCallback = null; // Renamed from pendingCallback for clarity
 
-function promptStudentIdentity(callback) {
-  pendingCallback = callback;
+function promptStudentIdentity(onSuccess) {
+  if (document.getElementById('mobileNav').classList.contains('active')) toggleMenu();
+
+  const savedName = localStorage.getItem('asamblari-currentStudent') || '';
+  const savedEmail = localStorage.getItem('asamblari-currentEmail') || '';
+
   const modal = document.createElement('div');
-  modal.id = 'identityModal';
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.id = 'studentModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
   modal.innerHTML = `
-    <div style="background:var(--bg-card);padding:2rem;border-radius:16px;max-width:400px;width:100%;text-align:center">
-        <h3 style="margin-bottom:1rem;color:var(--primary)">👤 Identificare Elev</h3>
-        <p style="color:var(--text-secondary);margin-bottom:1.5rem">Înainte de a începe, te rugăm să introduci datele tale pentru a trimite rezultatul domnului profesor.</p>
-        <input type="text" id="studentName" placeholder="Nume și Prenume (ex: Popescu Andrei)" style="width:100%;padding:0.75rem;border:2px solid var(--primary);border-radius:10px;font-size:1rem;margin-bottom:1rem">
-        <input type="text" id="studentClass" placeholder="Clasa (ex: 10 A)" style="width:100%;padding:0.75rem;border:2px solid var(--primary);border-radius:10px;font-size:1rem;margin-bottom:1.5rem">
-        <div style="display:flex;gap:1rem">
-            <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('identityModal').remove()">Anulează</button>
-            <button class="btn btn-primary" style="flex:1" onclick="saveStudentIdentity()">Salvează și Începe</button>
-        </div>
+    <div style="background:var(--bg-card);padding:2rem;border-radius:16px;width:100%;max-width:400px;box-shadow:0 20px 40px rgba(0,0,0,0.3);position:relative">
+      <h3 style="margin-top:0;color:var(--primary);margin-bottom:1.5rem">📝 Identificare Elev</h3>
+      <div style="margin-bottom:1rem">
+        <label style="display:block;margin-bottom:0.5rem;font-weight:600">Nume și Prenume:</label>
+        <input type="text" id="studentNameInput" value="${savedName}" placeholder="ex: Popescu Ion" style="width:100%;padding:0.75rem;border:2px solid var(--primary);border-radius:8px;font-size:1rem;outline:none">
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <label style="display:block;margin-bottom:0.5rem;font-weight:600">Adresă de Email:</label>
+        <input type="email" id="studentEmailInput" value="${savedEmail}" placeholder="ex: ion.popescu@email.com" style="width:100%;padding:0.75rem;border:2px solid var(--primary);border-radius:8px;font-size:1rem;outline:none">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="saveStudentIdentity()">✔ Continuă spre Test</button>
+      <button class="btn btn-secondary btn-block mt-2" onclick="document.getElementById('studentModal').remove()">❌ Anulează</button>
     </div>
   `;
   document.body.appendChild(modal);
-  document.getElementById('studentName').focus();
+  document.getElementById('studentNameInput').focus(); // Focus on the name input
+  pendingTestCallback = onSuccess; // Store the callback
 }
 
-window.saveStudentIdentity = function () {
-  const name = document.getElementById('studentName').value.trim();
-  const cls = document.getElementById('studentClass').value.trim();
-  if (!name || !cls) {
-    alert("Te rugăm să completezi ambele câmpuri!");
+function saveStudentIdentity() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  const email = document.getElementById('studentEmailInput').value.trim();
+
+  if (!name) {
+    alert('Te rugăm să introduci Numele și Prenumele!');
     return;
   }
-  currentStudent = { name, class: cls };
-  localStorage.setItem('asamblari-currentStudent', JSON.stringify(currentStudent));
-  document.getElementById('identityModal').remove();
-  if (pendingCallback) {
-    let cb = pendingCallback;
-    pendingCallback = null;
-    cb();
+
+  // Basic email validation regex
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailPattern.test(email)) {
+    alert('Te rugăm să introduci o adresă de email validă!');
+    return;
   }
-};
+
+  currentStudent = { name, email };
+  localStorage.setItem('asamblari-currentStudent', name); // Still save name separately for backward compatibility if needed
+  localStorage.setItem('asamblari-currentEmail', email);
+
+  document.getElementById('studentModal').remove();
+
+  if (pendingTestCallback) {
+    pendingTestCallback();
+    pendingTestCallback = null;
+  }
+}
 
 function sendResultEmail(testName, percentage, correct, wrong) {
-  if (!currentStudent) return;
+  if (!currentStudent || !currentStudent.name || !currentStudent.email) {
+    console.warn('Cannot send result: student identity not fully set.');
+    return;
+  }
   const url = "https://formsubmit.co/ajax/romii197575@gmail.com";
 
   // Save locally
-  const results = JSON.parse(localStorage.getItem('asamblari-submittedResults') || '[]');
-  results.push({
+  let submitted = JSON.parse(localStorage.getItem('asamblari-submittedResults') || '[]');
+  submitted.push({
     name: currentStudent.name,
-    clasa: currentStudent.class,
-    testName,
+    email: currentStudent.email,
+    testName: testName,
     pct: percentage,
-    correct,
-    total: correct + wrong,
     date: new Date().toISOString()
   });
-  localStorage.setItem('asamblari-submittedResults', JSON.stringify(results));
+  localStorage.setItem('asamblari-submittedResults', JSON.stringify(submitted));
 
+  // Send via FormSubmit
   fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     },
     body: JSON.stringify({
-      "Elev": currentStudent.name,
-      "Clasa": currentStudent.class,
-      "Test_Efectuat": testName,
-      "Nota_Procentuala": percentage + "%",
-      "Raspunsuri_Corecte": correct,
-      "Raspunsuri_Gresite": wrong,
-      "Data_Ora": new Date().toLocaleString('ro-RO'),
-      "_subject": "Rezultat Nou: " + currentStudent.name + " - " + testName,
-      // "Email": email // Optionally add email if needed
+      _subject: `(Asamblari) Test nou de la ${currentStudent.name}`,
+      _replyto: currentStudent.email,
+      Nume: currentStudent.name,
+      Email: currentStudent.email,
+      Test: testName,
+      Scor: `${percentage}%`,
+      Detalii: `${correct} corecte, ${wrong} greșite`
     })
-  }).then(res => {
-    console.log('Result sent to teacher via FormSubmit');
-    alert('✅ Rezultat trimis cu succes către profesor!');
   })
     .catch(err => {
       console.error('Error sending result:', err);
@@ -3988,7 +4004,7 @@ function showTeacherPanel() {
           <div style="max-height:300px;overflow-y:auto">
             ${allResults.slice(-10).reverse().map(r => `
               <div style="padding:0.75rem;border-bottom:1px solid rgba(0,0,0,0.1)">
-                <strong>${r.name} (${r.clasa})</strong> - ${r.testName}: <span style="color:${parseFloat(r.pct) >= 70 ? 'var(--success)' : 'var(--warning)'}">${r.pct}%</span>
+                <strong>${r.name} (${r.email || 'Nespecificat'})</strong> - ${r.testName}: <span style="color:${parseFloat(r.pct) >= 70 ? 'var(--success)' : 'var(--warning)'}">${r.pct}%</span>
                 <div style="font-size:0.85rem;color:var(--text-muted)">${new Date(r.date).toLocaleString('ro-RO')}</div>
               </div>
             `).join('')}
